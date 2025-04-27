@@ -1,0 +1,38 @@
+name: Get GitHub User Email from Commit Author
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  get-email:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get the author of the latest commit
+        run: |
+          AUTHOR_USERNAME=$(git log -1 --pretty=format:'%an')  # Pega o nome do autor do commit
+          echo "Nome do autor do commit: $AUTHOR_USERNAME"
+
+          # Se quiser o nome de usuário GitHub, pode usar o AUTHOR_USERNAME para a requisição API
+          USERNAME=$(echo $AUTHOR_USERNAME | awk '{print tolower($0)}')  # Garantir que o nome de usuário seja em minúsculas
+          echo "Buscando e-mail para o usuário $USERNAME"
+
+          EMAIL=$(curl -s https://api.github.com/users/$USERNAME | jq -r '.email')
+
+          if [ "$EMAIL" != "null" ]; then
+            echo "Email do usuário $USERNAME: $EMAIL"
+          else
+            echo "O email do usuário $USERNAME não é público."
+          fi
+
+          # Nesse step estamos salvando o email do autor do commit na variável de ambiente USER_EMAIL, que será usada na parte responsável por enviar o email (: 
+          echo "USER_EMAIL=$EMAIL" >> $GITHUB_ENV
+
+      - name: Display email
+        run: |
+          echo "O email do autor do commit é: $USER_EMAIL"

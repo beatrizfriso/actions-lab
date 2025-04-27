@@ -1,0 +1,101 @@
+name: CI/CD Node.js App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get author email from latest commit
+        id: get_author_email
+        run: |
+          AUTHOR_EMAIL=$(git log -1 --pretty=format:'%ae')
+          echo "AUTHOR_EMAIL=$AUTHOR_EMAIL" >> $GITHUB_ENV
+          echo "author_email=$AUTHOR_EMAIL" >> $GITHUB_OUTPUT
+
+      - name: Cache Node.js modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Tests
+        run: npm test
+
+      - name: Build Application
+        run: npm run build
+
+      - name: Save Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-build
+          path: dist/
+
+      - name: Send failure notification email
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USER }}
+          password: ${{ secrets.EMAIL_PASS }}
+          subject: "❌ Seu commit falhou no build/teste!"
+          body: |
+            Olá,
+
+            Infelizmente o seu commit não passou nos testes ou build :(
+
+            Acesse os detalhes da execução clicando abaixo:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            Informações adicionais:
+            - Autor do Commit: ${{ github.actor }}
+            - Branch: ${{ github.ref }}
+            - Workflow: ${{ github.workflow }}
+
+            Abraços do bot 🚀
+
+          to: ${{ steps.get_author_email.outputs.author_email }}
+          from: "Bot CI/CD"
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-build
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Release v${{ github.run_number }}
+          files: |
+            dist/**
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy para ambiente de teste
+        run: |
+          echo "🚀 Railway detectará o novo commit e fará o deploy automático após o sucesso das etapas de build, teste e release"
