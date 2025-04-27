@@ -1,9 +1,12 @@
-name: CI/CD Node.js App
+name: CI/CD - Node.js App
 
 on:
   push:
     branches:
       - main
+
+permissions:
+  contents: write
 
 jobs:
   build-and-test:
