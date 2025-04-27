@@ -1,0 +1,20 @@
+{
+  "name": "meu-app-node",
+  "version": "1.0.0",
+  "description": "App básico Node.js para teste de pipeline CI/CD",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "jest",
+    "build": "echo 'Simulando build...' && mkdir dist && cp app.js dist/"
+  },
+  "author": "Beatriz Friso",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.4"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "supertest": "^6.3.3"
+  }
+}
