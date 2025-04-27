@@ -1,4 +1,4 @@
-name: Get GitHub User Email from Commit Author
+name: Get GH User Email
 
 on:
   push:
