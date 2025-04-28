@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Valida o padrão da mensagem de commit
-        uses: beatrizfriso/commit-message-linter@v1
+        uses: beatrizfriso/commit-message-linter@v2
         with:
           pattern: "^(feat|fix|chore|docs|refactor|style|test): .{10,}$"
 
