@@ -87,7 +87,7 @@ jobs:
 
       - name: Deploy para ambiente de teste
         run: |
-          echo "🚀 Railway irá detectar o novo commit e fará o deploy automático após o sucesso das etapas de build, teste e release. Você pode conferir a aplicação na URL: []"
+          echo "🚀 Railway irá detectar o novo commit e fará o deploy automático após o sucesso das etapas de build, teste e release. Você pode conferir a aplicação na URL: http://actions-lab-dev.up.railway.app"
 
   notify-failure:
     runs-on: ubuntu-latest
